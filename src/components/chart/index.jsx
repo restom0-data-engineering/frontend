@@ -4,110 +4,59 @@ import { Chart } from "react-google-charts";
 import axios from "axios";
 import { Typography } from "@mui/material";
 
-function toDate(str) {
-  return new Date(str);
-}
-
 export default function Charts(props) {
-  // const [sessionID, setSessionID] = useState(props.api_token);
-  // const [tempLoading, setTempLoading] = useState(true);
-  // const [lightLoading, setLightLoading] = useState(true);
-  // const [humidLoading, setHumidLoading] = useState(true);
-  // const [moistureLoading, setMoistureLoading] = useState(true);
-  // const [EDLoading, setEDLoading] = useState(true);
-  // const [processedTemp, setProcessedTemp] = useState([[{ type: "date", label: "time" }, "°C"]]);
-  // const [processedLight, setProcessedLight] = useState([[{ type: "date", label: "time" }, "lux"]]);
-  // const [processedHumid, setProcessedHumid] = useState([[{ type: "date", label: "time" }, "%"]]);
-  // const [processedMoisture, setProcessedMoisture] = useState([[{ type: "date", label: "time" }, "%"]]);
-  // const [processedED, setProcessedED] = useState([[{ type: "date", label: "time" }, ""]]);
+  const [codeAnalysitc, setCodeAnalysitc] = useState({});
 
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         const config = {
-  //           headers: {
-  //             Authorization: "Bearer " + sessionID,
-  //           },
-  //         };
-  //         const tempResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/temp`,
-  //           config
-  //         );
-  //         setProcessedTemp(
-  //           processedTemp.concat(
-  //             tempResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setTempLoading(false);
+  function convertDataToChart(data) {
+    var lst = [["code", "total_amount"]];
+    for (var i = 0; i < data.length; i++) {
+      lst.push([data[i].promo_code, data[i].TOTAL_AMOUNT]);
+    }
+    return lst;
+  }
 
-  //         const lightResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/light`,
-  //           config
-  //         );
-  //         setProcessedLight(
-  //           processedLight.concat(
-  //             lightResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setLightLoading(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/code-analysis/"
+        );
+        data = response.data.data;
 
-  //         const humidResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/humid`,
-  //           config
-  //         );
-  //         setProcessedHumid(
-  //           processedHumid.concat(
-  //             humidResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setHumidLoading(false);
+        setCodeAnalysitc(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
 
-  //         const moistureResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/moisture`,
-  //           config
-  //         );
-  //         setProcessedMoisture(
-  //           processedMoisture.concat(
-  //             moistureResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setMoistureLoading(false);
-
-  //         const EDResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/ed`,
-  //           config
-  //         );
-  //         setProcessedED(
-  //           processedED.concat(
-  //             EDResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setEDLoading(false);
-  //       } catch (error) {
-  //         if (error.response.status == 403 || error.response.status == 401) {
-  //           alert("Error: " + error.response.data.message);
-  //           navigate("/login");
-  //         } else {
-  //           alert("Error: " + error.response.data.error);
-  //           console.error("Error fetching data:", error);
-  //         }
-  //       }
-  //     };
-  //     fetchData();
-  //     const intervalId = setInterval(fetchData, 10 * 1000);
-
-  //     return () => clearInterval(intervalId);
-  //   }, []);
+  const dataChart = [
+    {
+      promo_code: "None",
+      TOTAL_AMOUNT: 37884770000,
+      PROMO_AMOUNT: 0,
+      COUNT: 0,
+      START_DAY: "2016-08-07T09:22:39.501036Z",
+      END_DAY: "2022-07-31T23:16:43.885323Z",
+    },
+    {
+      promo_code: "AZ2022",
+      TOTAL_AMOUNT: 6675745000,
+      PROMO_AMOUNT: 60119641,
+      COUNT: 12005,
+      START_DAY: "2016-08-08T06:25:24.341833Z",
+      END_DAY: "2022-07-29T22:16:37.169906Z",
+    },
+    {
+      promo_code: "BUYMORE",
+      TOTAL_AMOUNT: 4962927000,
+      PROMO_AMOUNT: 44486761,
+      COUNT: 8942,
+      START_DAY: "2016-08-08T03:46:50.958678Z",
+      END_DAY: "2022-07-29T12:48:21.123459Z",
+    },
+  ];
 
   return (
     <div className="grid grid-cols-2 gap-[20px]">
@@ -119,6 +68,31 @@ export default function Charts(props) {
       <div className="rounded-lg bg-white mb-4 h-[625px]">
         <Typography variant="h5" className="!font-extrabold ps-8 pt-4 ">
           Báo cáo doanh thu
+          <Chart
+            width={"100%"}
+            height={"100%"}
+            chartType="BarChart"
+            loader={<div>Loading Chart</div>}
+            data={convertDataToChart(dataChart)}
+            options={{
+              legend: { position: "bottom" },
+            }}
+            rootProps={{ "data-testid": "6" }}
+            chartPackages={["corechart", "controls"]}
+            render={({ renderChart }) => {
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    height: "100%",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div>{renderChart()}</div>
+                </div>
+              );
+            }}
+          />
         </Typography>
       </div>
     </div>

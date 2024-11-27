@@ -10,10 +10,7 @@ export default function Header() {
           <p className="text-white text-[24pt]">Ecommerce Dashboard</p>
         </Link>
       </div>
-      <div className="flex items-center gap-2">
-        <IoMdSettings cursor={"pointer"} color="white" size={20} />
-        <IoIosNotifications cursor={"pointer"} color="white" size={20} />
-      </div>
+      <div className="flex items-center gap-2"></div>
     </div>
   );
 }
