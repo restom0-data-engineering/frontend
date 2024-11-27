@@ -1,113 +1,50 @@
 import React, { useState, useEffect } from "react";
-import { CircularProgress } from "@mui/material";
 import { Chart } from "react-google-charts";
 import axios from "axios";
 import { Typography } from "@mui/material";
 
-function toDate(str) {
-  return new Date(str);
-}
+const dataDefault = [
+  {
+    promo_code: "None",
+    TOTAL_AMOUNT: 0,
+    PROMO_AMOUNT: 0,
+    COUNT: 0,
+    START_DAY: "2016-08-07T09:22:39.501036Z",
+    END_DAY: "2022-07-31T23:16:43.885323Z",
+  },
+];
 
 export default function Charts(props) {
-  // const [sessionID, setSessionID] = useState(props.api_token);
-  // const [tempLoading, setTempLoading] = useState(true);
-  // const [lightLoading, setLightLoading] = useState(true);
-  // const [humidLoading, setHumidLoading] = useState(true);
-  // const [moistureLoading, setMoistureLoading] = useState(true);
-  // const [EDLoading, setEDLoading] = useState(true);
-  // const [processedTemp, setProcessedTemp] = useState([[{ type: "date", label: "time" }, "°C"]]);
-  // const [processedLight, setProcessedLight] = useState([[{ type: "date", label: "time" }, "lux"]]);
-  // const [processedHumid, setProcessedHumid] = useState([[{ type: "date", label: "time" }, "%"]]);
-  // const [processedMoisture, setProcessedMoisture] = useState([[{ type: "date", label: "time" }, "%"]]);
-  // const [processedED, setProcessedED] = useState([[{ type: "date", label: "time" }, ""]]);
+  const [codeAnalysitc, setCodeAnalysitc] = useState(dataDefault);
 
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         const config = {
-  //           headers: {
-  //             Authorization: "Bearer " + sessionID,
-  //           },
-  //         };
-  //         const tempResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/temp`,
-  //           config
-  //         );
-  //         setProcessedTemp(
-  //           processedTemp.concat(
-  //             tempResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setTempLoading(false);
+  function convertDataToChart(data, xAxis, yAxis) {
+    var temp = [yAxis];
+    temp = temp.concat(xAxis);
+    var lst = [temp];
+    for (var i = 0; i < data.length; i++) {
+      temp = [data[i][yAxis]];
+      xAxis.map((item) => {
+        temp.push(data[i][item]);
+      });
+      lst.push(temp);
+    }
+    return lst;
+  }
 
-  //         const lightResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/light`,
-  //           config
-  //         );
-  //         setProcessedLight(
-  //           processedLight.concat(
-  //             lightResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setLightLoading(false);
-
-  //         const humidResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/humid`,
-  //           config
-  //         );
-  //         setProcessedHumid(
-  //           processedHumid.concat(
-  //             humidResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setHumidLoading(false);
-
-  //         const moistureResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/moisture`,
-  //           config
-  //         );
-  //         setProcessedMoisture(
-  //           processedMoisture.concat(
-  //             moistureResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setMoistureLoading(false);
-
-  //         const EDResponse = await axios.get(
-  //           `http://localhost:3001/sensors/chart/ed`,
-  //           config
-  //         );
-  //         setProcessedED(
-  //           processedED.concat(
-  //             EDResponse.data.data.map(({ _id, userID, data, Date }) => {
-  //               return [toDate(Date), parseFloat(data)];
-  //             })
-  //           )
-  //         );
-  //         setEDLoading(false);
-  //       } catch (error) {
-  //         if (error.response.status == 403 || error.response.status == 401) {
-  //           alert("Error: " + error.response.data.message);
-  //           navigate("/login");
-  //         } else {
-  //           alert("Error: " + error.response.data.error);
-  //           console.error("Error fetching data:", error);
-  //         }
-  //       }
-  //     };
-  //     fetchData();
-  //     const intervalId = setInterval(fetchData, 10 * 1000);
-
-  //     return () => clearInterval(intervalId);
-  //   }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/code-analysis/"
+        );
+        var data = response.data;
+        setCodeAnalysitc(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="grid grid-cols-2 gap-[20px]">
@@ -118,7 +55,54 @@ export default function Charts(props) {
       </div>
       <div className="rounded-lg bg-white mb-4 h-[625px]">
         <Typography variant="h5" className="!font-extrabold ps-8 pt-4 ">
-          Báo cáo doanh thu
+          Báo cáo tình trạng sử dụng mã khuyến mãi
+          <Chart
+            width={"100%"}
+            height={"100%"}
+            chartType="BarChart"
+            loader={<div>Loading Chart</div>}
+            data={convertDataToChart(
+              codeAnalysitc,
+              ["TOTAL_AMOUNT"],
+              "promo_code"
+            )}
+            options={{
+              legend: { position: "bottom" },
+              title: "Biểu đồ tổng giá trị đơn hàng có mã khuyến mãi",
+              vAxis: { title: "Mã khuyến mãi" },
+              bar: { groupWidth: "50%" },
+            }}
+          />
+          <Chart
+            width={"100%"}
+            height={"100%"}
+            chartType="BarChart"
+            loader={<div>Loading Chart</div>}
+            data={convertDataToChart(
+              codeAnalysitc,
+              ["PROMO_AMOUNT"],
+              "promo_code"
+            )}
+            options={{
+              legend: { position: "bottom" },
+              title: "Biểu đồ tổng giá trị đơn hàng có mã khuyến mãi",
+              vAxis: { title: "Mã khuyến mãi" },
+              bar: { groupWidth: "50%" },
+            }}
+          />
+          <Chart
+            width={"100%"}
+            height={"100%"}
+            chartType="BarChart"
+            loader={<div>Loading Chart</div>}
+            data={convertDataToChart(codeAnalysitc, ["COUNT"], "promo_code")}
+            options={{
+              legend: { position: "bottom" },
+              title: "Biểu đồ tổng giá trị đơn hàng có mã khuyến mãi",
+              vAxis: { title: "Mã khuyến mãi" },
+              bar: { groupWidth: "50%" },
+            }}
+          />
         </Typography>
       </div>
     </div>
