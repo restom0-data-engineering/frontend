@@ -48,12 +48,12 @@ export default function Charts(props) {
 
   return (
     <div className="grid grid-cols-2 gap-[20px]">
-      <div className="rounded-lg bg-white mb-4 h-[625px]">
+      <div className="rounded-lg bg-white mb-4 h-[700px]">
         <Typography variant="h5" className="!font-extrabold ps-8 pt-4 ">
           Chi tiết phân khúc người dùng
         </Typography>
       </div>
-      <div className="rounded-lg bg-white mb-4 h-[625px]">
+      <div className="rounded-lg bg-white mb-4 h-[700px]">
         <Typography variant="h5" className="!font-extrabold ps-8 pt-4 ">
           Báo cáo tình trạng sử dụng mã khuyến mãi
           <Chart
