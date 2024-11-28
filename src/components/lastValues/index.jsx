@@ -77,8 +77,23 @@ const dataDefault1 = Object.values(
   )
 );
 
+const dataDefault2 = [
+  {
+    month: 1,
+    search_keywords: "None",
+    search_count: 100,
+  },
+  {
+    month: 2,
+    search_keywords: "None",
+    search_count: 100,
+  },
+];
+
 export default function LastValues(props) {
   const [customerAnalysitc, setCustomerAnalysitc] = useState(dataDefault1);
+  const [keywordAnalysitc, setKeywordAnalysitc] = useState(dataDefault2);
+  // const [successAnalysitc, setSuccessAnalysitc] = useState([{}]);
 
   function convertDataToChart(data, xAxis, yAxis) {
     var temp = [yAxis];
@@ -97,12 +112,18 @@ export default function LastValues(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8000/customer-analysis/"
-        );
-        var data = response.data;
+        const urls = [
+          "http://localhost:8000/customer-analysis/",
+          "http://localhost:8000/keyword-analysis/",
+          // "http://localhost:8000/success-analysis/",
+        ];
+        const responses = await Promise.all(urls.map((url) => axios.get(url)));
+
+        var data_customer_analysis = responses[0].data;
+        var data_keyword_analysis = responses[1].data;
+        // var data_success_analysis = responses[2].data;
         const transformedData = Object.values(
-          data.reduce(
+          data_customer_analysis.reduce(
             (
               result,
               { total_customers, gender_distribution, country_distribution }
@@ -126,16 +147,16 @@ export default function LastValues(props) {
             {}
           )
         );
-
+        console.log(data_keyword_analysis);
         setCustomerAnalysitc(transformedData);
+        setKeywordAnalysitc(data_keyword_analysis);
+        // setSuccessAnalysitc(data_success_analysis);
       } catch (error) {
         console.error(error);
       }
     };
     fetchData();
   }, []);
-
-  console.log(dataDefault1);
 
   return (
     <div>
@@ -150,6 +171,19 @@ export default function LastValues(props) {
             <div className="col-span-1 bg-white h-[275px]">
               <Typography variant="h5" className="!font-extrabold ps-8 pt-4">
                 Từ khóa nổi bật
+                <Chart
+                  chartType="PieChart"
+                  data={convertDataToChart(
+                    keywordAnalysitc,
+                    ["search_count"],
+                    "search_keywords"
+                  )}
+                  options={{
+                    title: "Từ khóa nổi bật",
+                  }}
+                  width={"100%"}
+                  height={"400px"}
+                />
               </Typography>
             </div>
           </div>
@@ -162,7 +196,7 @@ export default function LastValues(props) {
                 chartType="BarChart"
                 loader={<div>Loading Chart</div>}
                 data={convertDataToChart(
-                  dataDefault1,
+                  customerAnalysitc,
                   ["maleTotal", "femaleTotal"],
                   "country_distribution"
                 )}
