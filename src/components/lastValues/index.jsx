@@ -2,41 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Typography } from "@mui/material";
 import { Chart } from "react-google-charts";
-// function formatDateInfo(inputTime) {
-//   const date = new Date(inputTime);
-//   const today = new Date();
-//   const yesterday = new Date(today);
-//   yesterday.setDate(yesterday.getDate() - 1);
-
-//   const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
-//   const isYesterday = date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
-
-//   if (isToday) {
-//       return `Hôm nay lúc ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-//   } else if (isYesterday) {
-//       return `Hôm qua lúc ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-//   } else {
-//       const day = date.getDate().toString().padStart(2, '0');
-//       const month = (date.getMonth() + 1).toString().padStart(2, '0');
-//       const year = date.getFullYear();
-//       const hours = date.getHours().toString().padStart(2, '0');
-//       const minutes = date.getMinutes().toString().padStart(2, '0');
-//       return `${day}/${month}/${year} lúc ${hours}:${minutes}`;
-//   }
-//   return inputTime;
-// }
-
-// function formatTime(inputTime) {
-//   const date = new Date(inputTime);
-
-//   const hours = date.getHours().toString().padStart(2, "0");
-//   const minutes = date.getMinutes().toString().padStart(2, "0");
-//   const day = date.getDate().toString().padStart(2, "0");
-//   const month = (date.getMonth() + 1).toString().padStart(2, "0");
-//   const year = date.getFullYear();
-
-//   return `${hours}:${minutes} ${day}/${month}/${year}`;
-// }
 
 const dataDefault = [
   {
@@ -90,10 +55,23 @@ const dataDefault2 = [
   },
 ];
 
+const dataDefault3 = {
+  most_sold_products: {
+    1: 10,
+    2: 6,
+    3: 2,
+  },
+  total_revenue_by_product: {
+    1: 450,
+    2: 900,
+    3: 100,
+  },
+};
+
 export default function LastValues(props) {
   const [customerAnalysitc, setCustomerAnalysitc] = useState(dataDefault1);
   const [keywordAnalysitc, setKeywordAnalysitc] = useState(dataDefault2);
-  // const [successAnalysitc, setSuccessAnalysitc] = useState([{}]);
+  const [productAnalysitc, setProductAnalysitc] = useState(dataDefault3);
 
   function convertDataToChart(data, xAxis, yAxis) {
     var temp = [yAxis];
@@ -109,19 +87,30 @@ export default function LastValues(props) {
     return lst;
   }
 
+  function convertproductAnalysitcToChart(data) {
+    const most_sold_products = Object.entries(data.most_sold_products);
+    const total_revenue_by_product = Object.entries(
+      data.total_revenue_by_product
+    );
+    most_sold_products.unshift(["product_id", "quality"]);
+    total_revenue_by_product.unshift(["product_id", "total_revenue"]);
+    const lst = [most_sold_products, total_revenue_by_product];
+    return lst;
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const urls = [
           "http://localhost:8000/customer-analysis/",
           "http://localhost:8000/keyword-analysis/",
-          // "http://localhost:8000/success-analysis/",
+          "http://localhost:8000/product-analysis/",
         ];
         const responses = await Promise.all(urls.map((url) => axios.get(url)));
 
         var data_customer_analysis = responses[0].data;
         var data_keyword_analysis = responses[1].data;
-        // var data_success_analysis = responses[2].data;
+        var data_product_analysis = responses[2].data;
         const transformedData = Object.values(
           data_customer_analysis.reduce(
             (
@@ -141,16 +130,14 @@ export default function LastValues(props) {
               } else if (gender_distribution === "F") {
                 result[country_distribution].femaleTotal += total_customers;
               }
-
               return result;
             },
             {}
           )
         );
-        console.log(data_keyword_analysis);
         setCustomerAnalysitc(transformedData);
         setKeywordAnalysitc(data_keyword_analysis);
-        // setSuccessAnalysitc(data_success_analysis);
+        setProductAnalysitc(data_product_analysis);
       } catch (error) {
         console.error(error);
       }
@@ -163,26 +150,102 @@ export default function LastValues(props) {
       <div>
         <div className="grid grid-cols-2 gap-[20px] w-full">
           <div>
-            <div className="col-span-1 bg-white h-[275px] mb-[20px]">
+            <div className="col-span-1 bg-white h-[475px] mb-[20px]">
               <Typography variant="h5" className="!font-extrabold ps-8 pt-4 ">
                 Báo cáo doanh thu
+                <Chart
+                  width={"100%"}
+                  height={"100%"}
+                  chartType="BarChart"
+                  loader={<div>Loading Chart</div>}
+                  data={convertproductAnalysitcToChart(dataDefault3)[0]}
+                  options={{
+                    legend: { position: "bottom" },
+                    title: "Biểu đồ sản phẩm bán chạy nhất",
+                    vAxis: { title: "id sản phẩm" },
+                    bar: { groupWidth: "50%" },
+                  }}
+                />
+                <Chart
+                  width={"100%"}
+                  height={"100%"}
+                  chartType="BarChart"
+                  loader={<div>Loading Chart</div>}
+                  data={convertproductAnalysitcToChart(dataDefault3)[1]}
+                  options={{
+                    legend: { position: "bottom" },
+                    title: "Biểu đồ doanh thu sản phẩm bán nhiều nhất",
+                    vAxis: { title: "id sản phẩm" },
+                    bar: { groupWidth: "50%" },
+                  }}
+                />
               </Typography>
             </div>
-            <div className="col-span-1 bg-white h-[275px]">
+            <div className="col-span-1 bg-white h-[475px]">
               <Typography variant="h5" className="!font-extrabold ps-8 pt-4">
                 Từ khóa nổi bật
                 <Chart
+                  width={600}
+                  height={300}
                   chartType="PieChart"
+                  loader={<div>Loading Chart</div>}
                   data={convertDataToChart(
                     keywordAnalysitc,
-                    ["search_count"],
+                    ["month", "search_count"],
                     "search_keywords"
                   )}
                   options={{
-                    title: "Từ khóa nổi bật",
+                    legend: "none",
+                    chartArea: { left: 15, top: 15, right: 0, bottom: 0 },
+                    pieSliceText: "label",
                   }}
-                  width={"100%"}
-                  height={"400px"}
+                  rootProps={{ "data-testid": "1" }}
+                  chartWrapperParams={{ view: { columns: [0, 2] } }}
+                  chartPackages={["corechart", "controls"]}
+                  render={({ renderControl, renderChart }) => {
+                    return (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <div style={{ width: "70%", paddingTop: 10 }}>
+                          <div
+                            style={{
+                              height: 75,
+                              border: "solid 1px #ccc",
+                              padding: 10,
+                              paddingTop: 20,
+                              marginTop: 10,
+                              fontSize: "20px",
+                            }}
+                          >
+                            {renderControl(
+                              ({ controlProp }) =>
+                                controlProp.controlID === "select-month"
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ width: "50%" }}>{renderChart()}</div>
+                      </div>
+                    );
+                  }}
+                  controls={[
+                    {
+                      controlType: "CategoryFilter",
+                      controlID: "select-month",
+                      options: {
+                        filterColumnIndex: 1,
+                        ui: {
+                          labelStacking: "horizontal", // | "vertical"
+                          label: "Filter Month",
+                          allowTyping: false,
+                          allowMultiple: false,
+                        },
+                      },
+                    },
+                  ]}
                 />
               </Typography>
             </div>
