@@ -3,44 +3,11 @@ import axios from "axios";
 import { Typography } from "@mui/material";
 import { Chart } from "react-google-charts";
 
-const dataDefault = [
-  {
-    total_customers: 100,
-    gender_distribution: "M",
-    country_distribution: "None",
-  },
-  {
-    total_customers: 200,
-    gender_distribution: "F",
-    country_distribution: "New",
-  },
-];
-
-const dataDefault1 = Object.values(
-  dataDefault.reduce(
-    (
-      result,
-      { total_customers, gender_distribution, country_distribution }
-    ) => {
-      if (!result[country_distribution]) {
-        result[country_distribution] = {
-          country_distribution,
-          maleTotal: 0,
-          femaleTotal: 0,
-        };
-      }
-
-      if (gender_distribution === "M") {
-        result[country_distribution].maleTotal += total_customers;
-      } else if (gender_distribution === "F") {
-        result[country_distribution].femaleTotal += total_customers;
-      }
-
-      return result;
-    },
-    {}
-  )
-);
+const dataDefault1 = {
+  total_customers: 100,
+  gender_distribution: { F: 32548, M: 18157 },
+  country_distribution: { "Jakarta Raya": 9389, "Jawa Barat": 5781 },
+};
 
 const dataDefault2 = [
   {
@@ -77,7 +44,7 @@ export default function LastValues(props) {
     var temp = [yAxis];
     temp = temp.concat(xAxis);
     var lst = [temp];
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < 60; i++) {
       temp = [data[i][yAxis]];
       xAxis.map((item) => {
         temp.push(data[i][item]);
@@ -111,31 +78,32 @@ export default function LastValues(props) {
         var data_customer_analysis = responses[0].data;
         var data_keyword_analysis = responses[1].data;
         var data_product_analysis = responses[2].data;
-        const transformedData = Object.values(
-          data_customer_analysis.reduce(
-            (
-              result,
-              { total_customers, gender_distribution, country_distribution }
-            ) => {
-              if (!result[country_distribution]) {
-                result[country_distribution] = {
-                  country_distribution,
-                  maleTotal: 0,
-                  femaleTotal: 0,
-                };
-              }
+        console.log(data_keyword_analysis);
+        // const transformedData = Object.values(
+        //   data_customer_analysis.reduce(
+        //     (
+        //       result,
+        //       { total_customers, gender_distribution, country_distribution }
+        //     ) => {
+        //       if (!result[country_distribution]) {
+        //         result[country_distribution] = {
+        //           country_distribution,
+        //           maleTotal: 0,
+        //           femaleTotal: 0,
+        //         };
+        //       }
 
-              if (gender_distribution === "M") {
-                result[country_distribution].maleTotal += total_customers;
-              } else if (gender_distribution === "F") {
-                result[country_distribution].femaleTotal += total_customers;
-              }
-              return result;
-            },
-            {}
-          )
-        );
-        setCustomerAnalysitc(transformedData);
+        //       if (gender_distribution === "M") {
+        //         result[country_distribution].maleTotal += total_customers;
+        //       } else if (gender_distribution === "F") {
+        //         result[country_distribution].femaleTotal += total_customers;
+        //       }
+        //       return result;
+        //     },
+        //     {}
+        //   )
+        // );
+        setCustomerAnalysitc(data_customer_analysis);
         setKeywordAnalysitc(data_keyword_analysis);
         setProductAnalysitc(data_product_analysis);
       } catch (error) {
@@ -158,7 +126,7 @@ export default function LastValues(props) {
                   height={"100%"}
                   chartType="BarChart"
                   loader={<div>Loading Chart</div>}
-                  data={convertproductAnalysitcToChart(dataDefault3)[0]}
+                  data={convertproductAnalysitcToChart(productAnalysitc)[0]}
                   options={{
                     legend: { position: "bottom" },
                     title: "Biểu đồ sản phẩm bán chạy nhất",
@@ -171,7 +139,7 @@ export default function LastValues(props) {
                   height={"100%"}
                   chartType="BarChart"
                   loader={<div>Loading Chart</div>}
-                  data={convertproductAnalysitcToChart(dataDefault3)[1]}
+                  data={convertproductAnalysitcToChart(productAnalysitc)[1]}
                   options={{
                     legend: { position: "bottom" },
                     title: "Biểu đồ doanh thu sản phẩm bán nhiều nhất",
@@ -185,12 +153,12 @@ export default function LastValues(props) {
               <Typography variant="h5" className="!font-extrabold ps-8 pt-4">
                 Từ khóa nổi bật
                 <Chart
-                  width={600}
+                  width={450}
                   height={300}
                   chartType="PieChart"
                   loader={<div>Loading Chart</div>}
                   data={convertDataToChart(
-                    keywordAnalysitc,
+                    keywordAnalysitc.search_keywords,
                     ["month", "search_count"],
                     "search_keywords"
                   )}
@@ -210,7 +178,7 @@ export default function LastValues(props) {
                           flexDirection: "column",
                         }}
                       >
-                        <div style={{ width: "70%", paddingTop: 10 }}>
+                        <div style={{ width: "100%", paddingTop: 10 }}>
                           <div
                             style={{
                               height: 75,
@@ -258,15 +226,13 @@ export default function LastValues(props) {
                 height={"100%"}
                 chartType="BarChart"
                 loader={<div>Loading Chart</div>}
-                data={convertDataToChart(
-                  customerAnalysitc,
-                  ["maleTotal", "femaleTotal"],
-                  "country_distribution"
-                )}
+                data={[
+                  ["country", "total"],
+                  ...Object.entries(customerAnalysitc.country_distribution),
+                ]}
                 options={{
                   legend: { position: "bottom" },
-                  title:
-                    "Biểu đồ phân bổ giới tính khách hàng theo từng quốc gia",
+                  title: "Biểu đồ phân bổ khách hàng theo từng quốc gia",
                   vAxis: { title: "Quốc gia" },
                   bar: { groupWidth: "50%" },
                 }}
