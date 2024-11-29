@@ -44,7 +44,7 @@ export default function LastValues(props) {
     var temp = [yAxis];
     temp = temp.concat(xAxis);
     var lst = [temp];
-    for (var i = 0; i < 60; i++) {
+    for (var i = 0; i < data.length; i++) {
       temp = [data[i][yAxis]];
       xAxis.map((item) => {
         temp.push(data[i][item]);
@@ -78,33 +78,13 @@ export default function LastValues(props) {
         var data_customer_analysis = responses[0].data;
         var data_keyword_analysis = responses[1].data;
         var data_product_analysis = responses[2].data;
-        console.log(data_keyword_analysis.search_keywords);
-        // const transformedData = Object.values(
-        //   data_customer_analysis.reduce(
-        //     (
-        //       result,
-        //       { total_customers, gender_distribution, country_distribution }
-        //     ) => {
-        //       if (!result[country_distribution]) {
-        //         result[country_distribution] = {
-        //           country_distribution,
-        //           maleTotal: 0,
-        //           femaleTotal: 0,
-        //         };
-        //       }
-
-        //       if (gender_distribution === "M") {
-        //         result[country_distribution].maleTotal += total_customers;
-        //       } else if (gender_distribution === "F") {
-        //         result[country_distribution].femaleTotal += total_customers;
-        //       }
-        //       return result;
-        //     },
-        //     {}
-        //   )
-        // );
+        const transform_data = convertDataToChart(
+          data_keyword_analysis.search_keywords,
+          ["month", "search_count"],
+          "search_keywords"
+        );
         setCustomerAnalysitc(data_customer_analysis);
-        setKeywordAnalysitc(data_keyword_analysis);
+        setKeywordAnalysitc(transform_data);
         setProductAnalysitc(data_product_analysis);
       } catch (error) {
         console.error(error);
@@ -157,7 +137,7 @@ export default function LastValues(props) {
                   height={300}
                   chartType="PieChart"
                   loader={<div>Loading Chart</div>}
-                  data={[[]]}
+                  data={keywordAnalysitc}
                   options={{
                     legend: "none",
                     chartArea: { left: 15, top: 15, right: 0, bottom: 0 },

@@ -38,7 +38,6 @@ export default function Charts(props) {
           "http://localhost:8000/code-analysis/"
         );
         var data = response.data;
-        console.log(data);
         setCodeAnalysitc(data);
       } catch (error) {
         console.error(error);
