@@ -78,7 +78,7 @@ export default function LastValues(props) {
         var data_customer_analysis = responses[0].data;
         var data_keyword_analysis = responses[1].data;
         var data_product_analysis = responses[2].data;
-        console.log(data_keyword_analysis);
+        console.log(data_keyword_analysis.search_keywords);
         // const transformedData = Object.values(
         //   data_customer_analysis.reduce(
         //     (
@@ -157,11 +157,7 @@ export default function LastValues(props) {
                   height={300}
                   chartType="PieChart"
                   loader={<div>Loading Chart</div>}
-                  data={convertDataToChart(
-                    keywordAnalysitc.search_keywords,
-                    ["month", "search_count"],
-                    "search_keywords"
-                  )}
+                  data={[[]]}
                   options={{
                     legend: "none",
                     chartArea: { left: 15, top: 15, right: 0, bottom: 0 },

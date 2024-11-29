@@ -6,11 +6,11 @@ import { Typography } from "@mui/material";
 const dataDefault = [
   {
     promo_code: "None",
-    TOTAL_AMOUNT: 0,
-    PROMO_AMOUNT: 0,
-    COUNT: 0,
-    START_DAY: "2016-08-07T09:22:39.501036Z",
-    END_DAY: "2022-07-31T23:16:43.885323Z",
+    total_amount: 0,
+    promo_amount: 0,
+    count: 0,
+    start_day: "2016-08-07T09:22:39.501036Z",
+    end_day: "2022-07-31T23:16:43.885323Z",
   },
 ];
 
@@ -38,6 +38,7 @@ export default function Charts(props) {
           "http://localhost:8000/code-analysis/"
         );
         var data = response.data;
+        console.log(data);
         setCodeAnalysitc(data);
       } catch (error) {
         console.error(error);
@@ -63,7 +64,7 @@ export default function Charts(props) {
             loader={<div>Loading Chart</div>}
             data={convertDataToChart(
               codeAnalysitc,
-              ["TOTAL_AMOUNT"],
+              ["total_amount"],
               "promo_code"
             )}
             options={{
@@ -80,7 +81,7 @@ export default function Charts(props) {
             loader={<div>Loading Chart</div>}
             data={convertDataToChart(
               codeAnalysitc,
-              ["PROMO_AMOUNT"],
+              ["promo_amount"],
               "promo_code"
             )}
             options={{
@@ -95,7 +96,7 @@ export default function Charts(props) {
             height={"100%"}
             chartType="BarChart"
             loader={<div>Loading Chart</div>}
-            data={convertDataToChart(codeAnalysitc, ["COUNT"], "promo_code")}
+            data={convertDataToChart(codeAnalysitc, ["count"], "promo_code")}
             options={{
               legend: { position: "bottom" },
               title: "Biểu đồ tổng giá trị đơn hàng có mã khuyến mãi",
