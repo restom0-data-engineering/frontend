@@ -41,6 +41,9 @@ export default function LastValues(props) {
   const [productAnalysitc, setProductAnalysitc] = useState(dataDefault3);
 
   function convertDataToChart(data, xAxis, yAxis) {
+    if (!data || data.length === 0) {
+      return [];
+    }
     var temp = [yAxis];
     temp = temp.concat(xAxis);
     var lst = [temp];
@@ -126,12 +129,12 @@ export default function LastValues(props) {
                   height={"100%"}
                   chartType="BarChart"
                   loader={<div>Loading Chart</div>}
-                  data={convertproductAnalysitcToChart(productAnalysitc)[0]}
+                  data={
+                    convertproductAnalysitcToChart(productAnalysitc)?.[0] || []
+                  }
                   options={{
                     legend: { position: "bottom" },
                     title: "Biểu đồ sản phẩm bán chạy nhất",
-                    vAxis: { title: "id sản phẩm" },
-                    bar: { groupWidth: "50%" },
                   }}
                 />
                 <Chart
